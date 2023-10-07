@@ -6,8 +6,8 @@ from jose import jwt
 from jose.exceptions import JWTError
 from models import UserIdentity
 
-# SECRET_KEY = os.environ.get("JWT_SECRET_KEY") # TODO 
-SECRET_KEY = os.environ.get("WUFl5DPsDCA87+7PXMv4o0w5ZS8t6HTOodBXyqdwBzN8vtC53QmA5UzPX7dh4TlPcdHFF8rB3sUZp5LQ7O92jw==")
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY")  
+# SECRET_KEY = os.environ.get("WUFl5DPsDCA87+7PXMv4o0w5ZS8t6HTOodBXyqdwBzN8vtC53QmA5UzPX7dh4TlPcdHFF8rB3sUZp5LQ7O92jw==")
 ALGORITHM = "HS256"
 
 if not SECRET_KEY:
