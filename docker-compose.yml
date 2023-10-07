@@ -1,41 +1,67 @@
-version: '3'
+version: '3.8'
 
 services:
   frontend:
-    env_file:
-      - ./frontend/.env
+    image: documyneacreastus2.azurecr.io/documyne-frontend:latest
     build:
       context: frontend
       dockerfile: Dockerfile
     container_name: web
     restart: always
     ports:
-      - 3000:3000
+      - 80:80
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 0.5GB
+        reservations:
+          cpus: '0.25'
+          memory: 0.2GB
 
   backend-core:
-    env_file:
-      - ./backend/.env
+    image: documyneacreastus2.azurecr.io/documyne-backend:latest
     build:
       context: backend
       dockerfile: Dockerfile
     container_name: backend-core
     restart: always
     volumes:
-      - ./backend/:/code/
-    depends_on:
-      - redis
-      - worker
+      - backend-storage:/code/
+    # depends_on:
+    #   - redis
+    #   - worker
     ports:
       - 5050:5050
-    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 0.5GB
+        reservations:
+          cpus: '0.25'
+          memory: 0.2GB
+
   redis:
-    image: redis:latest
+    image: mcr.microsoft.com/oss/bitnami/redis:6.0.8
     container_name: redis
     restart: always
     ports:
       - 6379:6379
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 0.5GB
+        reservations:
+          cpus: '0.25'
+          memory: 0.2GB
+
   
   worker:
+    image: documyneacreastus2.azurecr.io/worker:latest
     env_file:
       - ./backend/.env
     build:
@@ -47,22 +73,47 @@ services:
     depends_on:
       - redis
     volumes:
-      - ./backend/:/code/
+      - backend-storage:/code/
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 0.5GB
+        reservations:
+          cpus: '0.25'
+          memory: 0.2GB
+
     
-    
-  flower:
-    env_file:
-      - ./backend/.env
-    build:
-      context: backend
-      dockerfile: Dockerfile
-    container_name: flower
-    command: celery -A celery_worker flower -l info --port=5555
-    restart: always
-    volumes:
-      - ./backend/:/code/
-    depends_on:
-      - redis
-      - worker
-    ports:
-      - 5555:5555
+  # flower:
+  #   image: documyneacreastus2.azurecr.io/flower:latest
+  #   env_file:
+  #     - ./backend/.env
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile
+  #   container_name: flower
+  #   command: celery -A celery_worker flower -l info --port=5555
+  #   restart: always
+  #   volumes:
+  #     - backend-storage:/code/
+  #   depends_on:
+  #     - redis
+  #     - worker
+  #   ports:
+  #     - 5555:5555
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 0.5GB
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 0.2GB
+
+volumes:
+  backend-storage:
+    driver: azure_file
+    driver_opts:
+      share_name: documyne-be-file-share
+      storage_account_name: documynestorageaccount3
+      storage_account_key: QuG+LqdR4wQottyevL3OVzE050TilOe0NUHyE4xr+2/d7iaimAy0VYaoWfj0Zojkwf/RlqPn0X39+AStvtElCA==

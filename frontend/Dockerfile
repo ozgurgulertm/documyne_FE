@@ -25,7 +25,11 @@ COPY . .
 RUN yarn build
 
 # Ensure port 3000 is accessible to our system
-EXPOSE 3000
+# EXPOSE 3000
+EXPOSE 80
 
 # Run yarn start, as we would via the command line 
-CMD ["yarn", "start"]
+CMD ["yarn", "start", "-p", "80"]
+# uvicorn main:app --port 80
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+
